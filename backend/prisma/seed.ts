@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import "dotenv/config";
 
 const prisma = new PrismaClient();
 
@@ -23,7 +24,7 @@ function getRandomInt(min: number, max: number) {
 }
 
 function getRandomItem<T>(arr: T[]): T {
-  return arr[getRandomInt(0, arr.length - 1)];
+  return arr[getRandomInt(0, arr.length - 1)]!;
 }
 
 function generateProductName() {
@@ -75,7 +76,6 @@ async function main() {
 main()
   .catch((e) => {
     console.error(e);
-    process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
