@@ -32,8 +32,15 @@ function generateProductName() {
 }
 
 async function main() {
-  console.log('Starting massive data seed...');
-  const totalRecords = 200000;
+  console.log('Checking database records count...');
+  const count = await prisma.product.count();
+  if (count >= 200000) {
+    console.log(`Database already has ${count} records. Skipping seeding.`);
+    return;
+  }
+
+  console.log(`Starting massive data seed for ${200000 - count} missing records...`);
+  const totalRecords = 200000 - count;
   const batchSize = 10000; // Optimal batch size for PostgreSQL
   
   const startTime = Date.now();
