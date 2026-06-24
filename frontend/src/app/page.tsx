@@ -66,7 +66,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
 
 // API Helpers
 const getApiBaseUrl = () => {
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  return process.env.NEXT_PUBLIC_API_URL || "https://vectorflow-engine-backend.onrender.com/api";
 };
 
 export default function Dashboard() {

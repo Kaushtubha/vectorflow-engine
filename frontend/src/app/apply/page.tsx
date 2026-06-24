@@ -106,7 +106,7 @@ export default function ApplyLoan() {
   const progress = calculateProgress();
 
   const getApiBaseUrl = () => {
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    return process.env.NEXT_PUBLIC_API_URL || "https://vectorflow-engine-backend.onrender.com/api";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
