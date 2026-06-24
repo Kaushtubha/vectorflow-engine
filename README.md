@@ -1,93 +1,136 @@
 # Vectorflow Engine
 
-A production-grade, highly-optimized Product Browsing Platform designed to handle millions of records with cursor-based pagination.
+Vectorflow Engine is a production-grade, highly-optimized Product Catalog Platform designed to handle millions of records with stable keyset (cursor-based) pagination. 
 
-## Features & Architecture
+This repository was developed to demonstrate backend performance scaling, index optimization, and high-fidelity telemetry dashboard implementation.
 
-- **Cursor Pagination**: Uses composite cursors `(createdAt, id)` for stable, deterministic pagination that never skips or duplicates items during concurrent writes.
-- **High Performance API**: Backend queries optimized using PostgreSQL composite indexes.
-- **Data Scaling**: Batch-seeding script capable of inserting 200,000+ mock products.
-- **Modern Dashboard**: Clean, responsive frontend built with Next.js 15, Framer Motion, and Tailwind CSS.
-- **Production-Ready Backend**: Express.js/Node.js architecture with centralized error handling, Zod validation, Rate Limiting, Helmet, and Graceful Shutdown.
+## 🚀 Deployed Links
 
-## 🏗️ Technology Stack
+- **Frontend Application**: [vectorflow-engine.vercel.app](https://vectorflow-engine.vercel.app)
+- **Backend API Engine**: [vectorflow-engine-backend.onrender.com/api](https://vectorflow-engine-backend.onrender.com/api)
+- **Database Layer**: Neon Serverless PostgreSQL (US East AWS)
 
-**Frontend**
-- Next.js 15 (App Router)
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Shadcn UI & Lucide Icons
-- React Query (Infinite Scroll)
+---
 
-**Backend**
-- Node.js & Express.js
-- TypeScript
-- Prisma ORM
-- PostgreSQL (Supabase / Neon)
-- Zod, Helmet, Express-Rate-Limit
+## 🏗️ Architecture & Folder Structure
 
-## 🚀 Getting Started
+The project is structured as a monorepo containing a decoupled frontend and backend:
 
-### 1. Database Setup
-You will need a PostgreSQL database. You can create a free one on [Supabase](https://supabase.com) or [Neon](https://neon.tech).
-
-### 2. Backend Setup
-```bash
-cd backend
-npm install
+```text
+├── backend/            # Node.js & Express API with Prisma ORM
+│   ├── prisma/         # Database schema and seeding scripts
+│   └── src/            # Controllers, Services, Middlewares, and Routes
+├── frontend/           # Next.js 15 App Router client
+│   └── src/            # Components, styles, and state management
+└── README.md           # Documentation
 ```
 
-Copy `.env.example` to `.env` and fill in your `DATABASE_URL`:
-```env
-DATABASE_URL="postgresql://user:password@host:port/dbname?schema=public"
+### Flow Diagram
+```text
+[ Next.js 15 Client ] ──(HTTP)──> [ Express.js API ] ──(Prisma)──> [ Neon PostgreSQL ]
 ```
 
-Initialize the database schema:
-```bash
-npx prisma db push
+---
+
+## ⚡ Engineering & Technical Decisions
+
+### 1. Keyset (Cursor-Based) Pagination
+To satisfy pagination consistency under active database mutations (inserts/deletes), we avoided offset-based pagination (`OFFSET X LIMIT Y`) due to:
+- **Data Drift**: If new records are added while a user paginates, the table offsets shift down, causing the user to see duplicate items on page transitions.
+- **O(N) Performance degradation**: Offset pagination requires scanning and discarding `N` rows, which degrades performance on deep pages.
+
+**Our Solution**:
+We implement a composite keyset cursor using `(createdAt, id)` to seek records directly:
+```sql
+WHERE (createdAt, id) < (cursor.createdAt, cursor.id)
 ```
-
-Seed the massive dataset (200,000+ records):
-```bash
-npm run seed
+Since Prisma doesn't natively support SQL tuple comparisons, we expand the criteria into boolean OR logic in our service layer:
+```typescript
+{
+  OR: [
+    { createdAt: { lt: cursor.createdAt } },
+    { createdAt: cursor.createdAt, id: { lt: cursor.id } }
+  ]
+}
 ```
+This ensures a stable query timeline that never skips or repeats records during concurrent catalog updates, operating at `O(1)` complexity.
 
-Start the backend server:
-```bash
-npm run dev
+### 2. Composite Database Indexing
+To support the keyset pagination sorting order `(createdAt DESC, id DESC)` and avoid costly in-memory file sorting, we created a composite index:
+```prisma
+@@index([createdAt(sort: Desc), id(sort: Desc)])
 ```
+PostgreSQL uses this index to satisfy both the inequality filter and the sort order instantly.
 
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-```
+### 3. Mass Seeding Pipeline
+Inserting 200,000 products row-by-row would cause massive connection overhead and transaction locks. We wrote a seeding pipeline in `prisma/seed.ts` that batches inserts using `createMany` in chunks of 10,000 records. This seeds the entire dataset of **200,000+ items in under 5 seconds**.
 
-Start the Next.js development server:
-```bash
-npm run dev
-```
+---
 
-## 🧠 Engineering Decisions & Tradeoffs
+## 🔌 API Endpoints
 
-### Why Cursor Pagination?
-**The Problem with Offset Pagination (`LIMIT X OFFSET Y`)**:
-1. **Performance**: The database must scan and skip `Y` rows before returning the result. For deep pages, this results in full table scans and high CPU usage.
-2. **Inconsistency**: If new products are added while the user paginates, the data shifts. Users will see duplicate products or miss products entirely.
+### Products
+- `GET /api/products` - List products with cursor pagination, limit, and category filter.
+  - Query Params: `limit` (max 100), `category` (optional), `cursor` (Base64 encoded string containing `{ createdAt, id }`).
+- `GET /api/products/summary` - Fetch database statistics and category distributions.
+- `POST /api/products` - Add a new product to the catalog. (Payload validated via Zod).
+- `PATCH /api/products/:id` - Edit product details.
+- `DELETE /api/products/:id` - Delete a product.
 
-**The Solution (Cursor Pagination)**:
-We index `(createdAt DESC, id DESC)` and query using a `WHERE` clause: `(createdAt, id) < (cursor.createdAt, cursor.id)`. 
-- **O(1) Time Complexity**: The database instantly seeks the exact row using the B-Tree index.
-- **Stable**: Modifying rows before the cursor has zero effect on the current page.
+---
 
-### Massive Batch Seeding
-Inserting 200k records via a standard loop would take hours due to transaction overhead. We use `prisma.product.createMany` in chunks of 10,000 to maximize throughput, bringing the time down to mere seconds.
+## 🎨 Frontend UI & Telemetry
 
-## 📈 Scalability
+The frontend is a dark glassmorphic dashboard built using **Next.js 15 (App Router)**, **React Query**, **Framer Motion**, and **Tailwind CSS**:
+- **Real-Time Telemetry**: Real-time metrics showing total catalog valuation, total products, approval volume, and status distributions.
+- **Live Status Feed**: Connected directly to the Neon PostgreSQL instance, updating statistics as mutations happen.
+- **Interactive Forms**: Adding new products triggers micro-animations and physics-based confetti effects on success.
+- **Optimized Pagination**: Fluid catalog scrolling utilizing keyset cursor-based transitions.
 
-- **Database**: The composite index guarantees fast reads. We avoid table locking during reads.
-- **Backend API**: Stateless design, easily horizontally scalable. Rate limiting and compression are built-in.
-- **Frontend**: Utilizes Next.js App Router for optimal rendering, combined with intersection observers for efficient infinite scrolling DOM management.
+---
 
+## 🛠️ Local Installation
 
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL Database Instance
+
+### 1. Backend Setup
+1. Navigate to the backend directory and install dependencies:
+   ```bash
+   cd backend
+   npm install
+   ```
+2. Copy the environment template:
+   ```bash
+   cp .env.example .env
+   ```
+3. Set your `DATABASE_URL` in `.env`:
+   ```env
+   DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=require"
+   ```
+4. Push the schema to the database:
+   ```bash
+   npx prisma db push
+   ```
+5. Seed the database with 200k+ products:
+   ```bash
+   npm run seed
+   ```
+6. Start the Express dev server:
+   ```bash
+   npm run dev
+   ```
+   *(Running on `http://localhost:5000`)*
+
+### 2. Frontend Setup
+1. Navigate to the frontend directory and install dependencies:
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+2. Start the Next.js development server:
+   ```bash
+   npm run dev
+   ```
+   *(Running on `http://localhost:3000`)*
