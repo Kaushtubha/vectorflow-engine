@@ -1,136 +1,180 @@
-# Vectorflow Engine
+# Vectorflow Catalog Portal
 
-Vectorflow Engine is a production-grade, highly-optimized Product Catalog Platform designed to handle millions of records with stable keyset (cursor-based) pagination. 
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js_15-App_Router-black?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React_19-UI-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS_4-Styling-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  <img src="https://img.shields.io/badge/Framer_Motion-12.x-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
+  <img src="https://img.shields.io/badge/Node.js-Express_5-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" />
+</p>
 
-This repository was developed to demonstrate backend performance scaling, index optimization, and high-fidelity telemetry dashboard implementation.
-
-## 🚀 Deployed Links
-
-- **Frontend Application**: [vectorflow-engine.vercel.app](https://vectorflow-engine.vercel.app)
-- **Backend API Engine**: [vectorflow-engine-backend.onrender.com/api](https://vectorflow-engine-backend.onrender.com/api)
-- **Database Layer**: Neon Serverless PostgreSQL (US East AWS)
+A production-grade, highly-optimized Product Catalog Platform designed to handle millions of records with stable keyset (cursor-based) pagination. Featuring a cinematic dark operations panel, real-time telemetry metrics, and fluid animations.
 
 ---
 
-## 🏗️ Architecture & Folder Structure
+## 🚀 Live Demo
 
-The project is structured as a monorepo containing a decoupled frontend and backend:
+- **Frontend URL**: [https://vectorflow-engine.vercel.app/](https://vectorflow-engine.vercel.app/)
+- **Backend URL**: [https://vectorflow-engine-backend.onrender.com/api/](https://vectorflow-engine-backend.onrender.com/api/)
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+graph LR
+    A[Frontend: Next.js 15 App Router] <-->|REST API + JSON| B(Backend: Node + Express)
+    B <-->|Prisma ORM| C[(Neon Serverless PostgreSQL)]
+    
+    classDef client fill:#0f172a,stroke:#e8184a,stroke-width:2px,color:#fff
+    classDef server fill:#1e293b,stroke:#6366f1,stroke-width:2px,color:#fff
+    classDef db fill:#334155,stroke:#10b981,stroke-width:2px,color:#fff
+    
+    class A client;
+    class B server;
+    class C db;
+```
+
+---
+
+## ✨ Features & Polish
+
+### 1. **Cinematic Dark Telemetry UI**
+- Deep glassmorphism elements layered with precisely calibrated box shadows, glowing accents, and brand-red `#e8184a` gradients.
+- Micro-interactions throughout the app: fluid input focusing, hover elevation on cards, and animated tooltips.
+
+### 2. **Operations Dashboard**
+- **Metrics Telemetry Bar**: Stats cards (Total products, Catalog valuation, Approved volume, Pending reviews) with hover-zoom physics.
+- **Capital Demand Curve**: Area Chart powered by Recharts, tracking recent application valuation profiles.
+- **Category Split**: Donut charts showing distribution of catalog categories.
+
+### 3. **True Keyset (Cursor-Based) Pagination**
+- Avoids offset-based pagination (`OFFSET X LIMIT Y`) to prevent **data drift** (duplicate or skipped items during concurrent insertions) and performance degradation.
+- Uses `(createdAt, id)` composite keyset cursor pagination to deliver **O(1) seek times** even deep in 200,000+ records.
+
+### 4. **New Product Submission**
+- **Validation**: Client-side validation for names, categories, prices, and descriptions.
+- **Micro-Animations**: Physic-based confetti effects (canvas-confetti) triggered upon successful catalog insertion.
+
+### 5. **Mass Seeding Pipeline**
+- Seeding pipeline built with chunked insertions of 10,000 records to insert **200,000+ mock products** in under 5 seconds.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS v4, Framer Motion, Recharts, React Query, Canvas Confetti.
+- **Backend**: Node.js, Express.js (v5), Prisma ORM, PostgreSQL (Neon.tech), Zod Validation, CORS.
+- **Deployment**: Vercel (Frontend), Render (Backend).
+
+---
+
+## 📁 Folder Structure
 
 ```text
-├── backend/            # Node.js & Express API with Prisma ORM
-│   ├── prisma/         # Database schema and seeding scripts
-│   └── src/            # Controllers, Services, Middlewares, and Routes
-├── frontend/           # Next.js 15 App Router client
-│   └── src/            # Components, styles, and state management
-└── README.md           # Documentation
-```
-
-### Flow Diagram
-```text
-[ Next.js 15 Client ] ──(HTTP)──> [ Express.js API ] ──(Prisma)──> [ Neon PostgreSQL ]
+vectorflow-engine/
+├── backend/
+│   ├── prisma/
+│   │   ├── schema.prisma      # Prisma schema (PostgreSQL index definition)
+│   │   └── seed.ts            # Mass seeder (200k+ products)
+│   ├── src/
+│   │   ├── config/            # Prisma Client wrapper
+│   │   ├── controllers/       # Business logic and summaries
+│   │   ├── middleware/        # Error handlers and validation
+│   │   ├── routes/            # REST API Route definitions
+│   │   ├── services/          # Keyset pagination service layer
+│   │   └── index.ts           # Server entry point
+│   ├── package.json
+│   └── tsconfig.json
+├── frontend/
+│   ├── src/
+│   │   ├── app/               # Page routing & components (page.tsx, layout.tsx, apply/)
+│   │   ├── components/        # Reusable telemetry components & Particle background
+│   │   └── globals.css        # Animations and custom scrollbars
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
+│   ├── tsconfig.json
+│   └── package.json
+└── README.md
 ```
 
 ---
 
-## ⚡ Engineering & Technical Decisions
-
-### 1. Keyset (Cursor-Based) Pagination
-To satisfy pagination consistency under active database mutations (inserts/deletes), we avoided offset-based pagination (`OFFSET X LIMIT Y`) due to:
-- **Data Drift**: If new records are added while a user paginates, the table offsets shift down, causing the user to see duplicate items on page transitions.
-- **O(N) Performance degradation**: Offset pagination requires scanning and discarding `N` rows, which degrades performance on deep pages.
-
-**Our Solution**:
-We implement a composite keyset cursor using `(createdAt, id)` to seek records directly:
-```sql
-WHERE (createdAt, id) < (cursor.createdAt, cursor.id)
-```
-Since Prisma doesn't natively support SQL tuple comparisons, we expand the criteria into boolean OR logic in our service layer:
-```typescript
-{
-  OR: [
-    { createdAt: { lt: cursor.createdAt } },
-    { createdAt: cursor.createdAt, id: { lt: cursor.id } }
-  ]
-}
-```
-This ensures a stable query timeline that never skips or repeats records during concurrent catalog updates, operating at `O(1)` complexity.
-
-### 2. Composite Database Indexing
-To support the keyset pagination sorting order `(createdAt DESC, id DESC)` and avoid costly in-memory file sorting, we created a composite index:
-```prisma
-@@index([createdAt(sort: Desc), id(sort: Desc)])
-```
-PostgreSQL uses this index to satisfy both the inequality filter and the sort order instantly.
-
-### 3. Mass Seeding Pipeline
-Inserting 200,000 products row-by-row would cause massive connection overhead and transaction locks. We wrote a seeding pipeline in `prisma/seed.ts` that batches inserts using `createMany` in chunks of 10,000 records. This seeds the entire dataset of **200,000+ items in under 5 seconds**.
-
----
-
-## 🔌 API Endpoints
-
-### Products
-- `GET /api/products` - List products with cursor pagination, limit, and category filter.
-  - Query Params: `limit` (max 100), `category` (optional), `cursor` (Base64 encoded string containing `{ createdAt, id }`).
-- `GET /api/products/summary` - Fetch database statistics and category distributions.
-- `POST /api/products` - Add a new product to the catalog. (Payload validated via Zod).
-- `PATCH /api/products/:id` - Edit product details.
-- `DELETE /api/products/:id` - Delete a product.
-
----
-
-## 🎨 Frontend UI & Telemetry
-
-The frontend is a dark glassmorphic dashboard built using **Next.js 15 (App Router)**, **React Query**, **Framer Motion**, and **Tailwind CSS**:
-- **Real-Time Telemetry**: Real-time metrics showing total catalog valuation, total products, approval volume, and status distributions.
-- **Live Status Feed**: Connected directly to the Neon PostgreSQL instance, updating statistics as mutations happen.
-- **Interactive Forms**: Adding new products triggers micro-animations and physics-based confetti effects on success.
-- **Optimized Pagination**: Fluid catalog scrolling utilizing keyset cursor-based transitions.
-
----
-
-## 🛠️ Local Installation
+## ⚙️ Local Installation & Setup
 
 ### Prerequisites
 - Node.js (v18+)
-- PostgreSQL Database Instance
+- PostgreSQL Database Instance (Local or Neon/Supabase)
 
-### 1. Backend Setup
-1. Navigate to the backend directory and install dependencies:
+### 1. Database & Backend Setup
+1. Navigate to the backend directory:
    ```bash
    cd backend
    npm install
    ```
-2. Copy the environment template:
+2. Setup environment variables:
    ```bash
    cp .env.example .env
    ```
-3. Set your `DATABASE_URL` in `.env`:
+   Edit `.env` with your PostgreSQL database URL:
    ```env
-   DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=require"
+   DATABASE_URL="postgresql://user:password@localhost:5432/vectorflow?schema=public"
+   PORT=5000
    ```
-4. Push the schema to the database:
+3. Push schemas, build and seed database:
    ```bash
    npx prisma db push
-   ```
-5. Seed the database with 200k+ products:
-   ```bash
    npm run seed
    ```
-6. Start the Express dev server:
+4. Start the backend server:
    ```bash
    npm run dev
    ```
-   *(Running on `http://localhost:5000`)*
 
 ### 2. Frontend Setup
-1. Navigate to the frontend directory and install dependencies:
+1. Open a new terminal and navigate to the frontend directory:
    ```bash
    cd ../frontend
    npm install
    ```
-2. Start the Next.js development server:
+2. Start the development server:
    ```bash
    npm run dev
    ```
-   *(Running on `http://localhost:3000`)*
+3. Open `http://localhost:3000` to explore the catalog portal.
+
+---
+
+## 📋 API Spec Reference
+
+- **`GET /api/products`**: Fetch products. Supports `cursor` (Base64), `limit` (max 100), and `category`.
+- **`GET /api/products/summary`**: Retrieve aggregate statistics for the dashboard.
+- **`POST /api/products`**: Add new product to database (Validated via Zod).
+- **`PATCH /api/products/:id`**: Update product details.
+- **`DELETE /api/products/:id`**: Remove product from database.
+
+---
+
+## ☁️ Deployment Guide
+
+### Database (Neon.tech)
+1. Register at Neon.tech, launch a PostgreSQL project, and copy the Connection URI.
+2. Set it as `DATABASE_URL` in your backend server environment.
+
+### Backend (Render)
+1. Link your GitHub repository on Render.
+2. Create a Web Service targeting the `backend` folder.
+   - Build Command: `npm install && npx prisma generate`
+   - Start Command: `node dist/index.js`
+3. Add Environment Variables: `DATABASE_URL`, `PORT=5000`.
+
+### Frontend (Vercel)
+1. Import repository on Vercel.
+2. Select the `frontend` folder as the Root Directory.
+3. Keep default Next.js build settings.
+
+---
+
+*Crafted with precision for optimal User Experience and System Reliability.*
