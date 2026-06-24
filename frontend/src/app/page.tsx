@@ -64,7 +64,6 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
   pending:  { bg: "bg-amber-500/10 dark:bg-amber-500/15",   text: "text-amber-600 dark:text-amber-400",     border: "border-amber-500/30" },
 };
 
-// API Helpers
 const getApiBaseUrl = () => {
   return process.env.NEXT_PUBLIC_API_URL || "https://vectorflow-engine-backend.onrender.com/api";
 };
@@ -74,17 +73,14 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [time, setTime] = useState<Date | null>(null);
 
-  // Filter States
   const [search, setSearch] = useState("");
   const [debSearch, setDebSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
-  // Keyset Pagination States
   const [cursors, setCursors] = useState<(string | null)[]>([null]);
   const [pageIndex, setPageIndex] = useState(0);
 
-  // Product Modal Detail State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", price: 0, category: "", description: "" });
@@ -95,18 +91,15 @@ export default function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  // Debounce search input
   useEffect(() => {
     const t = setTimeout(() => {
       setDebSearch(search);
-      // Reset pagination on search
       setCursors([null]);
       setPageIndex(0);
     }, 400);
     return () => clearTimeout(t);
   }, [search]);
 
-  // Reset pagination on category filter change
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setCategoryFilter(e.target.value);
     setCursors([null]);
@@ -121,7 +114,6 @@ export default function Dashboard() {
     return "Good Evening";
   };
 
-  // Queries
   const fetchSummary = async () => {
     const res = await fetch(`${getApiBaseUrl()}/products/summary`);
     if (!res.ok) throw new Error("Failed to fetch summary");
@@ -224,7 +216,6 @@ export default function Dashboard() {
     }
   };
 
-  // Pagination Actions
   const handleNextPage = () => {
     if (productsQuery.data?.nextCursor) {
       setCursors((prev) => {
@@ -273,14 +264,12 @@ export default function Dashboard() {
     a.click();
   };
 
-  // Map product price to status (approved/pending/rejected) for visual compatibility with Vitto Status
   const getStatus = (price: number) => {
     if (price > 500) return "approved";
     if (price > 150) return "pending";
     return "rejected";
   };
 
-  // Local derived charts data
   const summary: SummaryData = summaryQuery.data || {
     totalApplications: 0,
     totalAmount: 0,

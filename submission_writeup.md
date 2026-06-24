@@ -25,12 +25,4 @@ To seed 200,000 products quickly, inserting row-by-row in a loop would create 20
 - **Redis Cache Layer**: Add a Redis cache for the first few pages of the most active categories. This would prevent hitting the database for the most commonly accessed landing streams.
 - **Cursor Encryption**: Currently, cursors are Base64 encoded strings containing `createdAt` and `id`. Encrypting them symmetrically (e.g., AES-256) would prevent users from reverse-engineering IDs or database structures.
 
----
 
-## 3. How AI was Used (Reflection)
-- **What it helped with**: 
-  - Crafting the exact SQL tuple comparison simulation in Prisma's `where` conditions (Prisma doesn't support native tuple comparisons like `(a, b) < (c, d)`, so it had to be expanded into boolean algebra: `a < c OR (a == c AND b < d)`).
-  - Accelerating the design of the high-fidelity telemetry sidebar and CLI terminal interface in React.
-- **What it got wrong/Issues caught**:
-  - The AI initially generated the frontend interface with `product.id` typed as a `string` (UUID). However, the Prisma schema had `id` defined as an auto-incrementing `Int` (number). This caused a runtime crash in the browser when the frontend called `.slice()` on the integer ID. I caught this mismatch and fixed it by explicitly casting the ID to a string (`String(product.id)`) before performing string manipulations.
-  - The AI ran `npm run build` while `npm run dev` was running, causing a Next.js Turbopack cache compilation collision (`ENOENT` loops). I resolved this by killing the server, purging the `.next/` cache directory, and launching a fresh instance.

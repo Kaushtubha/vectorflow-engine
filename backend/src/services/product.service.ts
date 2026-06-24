@@ -8,13 +8,8 @@ export const getProducts = async (limit: number, category?: string, cursor?: str
   if (cursor) {
     const decoded = decodeCursor(cursor);
     if (decoded) {
-      // TRUE Cursor Pagination logic:
-      // (createdAt, id) < (cursor.createdAt, cursor.id)
-      // Since SQL doesn't always support tuple comparison natively across all ORMs perfectly, 
-      // we use OR conditions:
-      // 1. createdAt < cursor.createdAt
-      // OR
-      // 2. createdAt == cursor.createdAt AND id < cursor.id
+      // Keyset pagination using composite cursor (createdAt, id)
+      // Simulates tuple comparison: (createdAt, id) < (decoded.createdAt, decoded.id)
       cursorCondition = {
         OR: [
           {

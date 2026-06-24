@@ -1,14 +1,14 @@
-# Vectorflow Engine - Staff Level Project
+# Vectorflow Engine
 
-A production-grade, highly-optimized Product Browsing Platform designed to handle millions of records with TRUE cursor-based pagination. Built for a highly competitive software engineering internship selection round.
+A production-grade, highly-optimized Product Browsing Platform designed to handle millions of records with cursor-based pagination.
 
-## ✨ Premium Features & Architecture
+## Features & Architecture
 
-- **True Cursor Pagination**: No `OFFSET`. Uses composite cursors `(createdAt, id)` for stable, deterministic pagination that never skips or duplicates items, even during active data mutations.
-- **High Performance API**: Sub-millisecond queries backed by PostgreSQL composite indexes.
-- **Massive Data Scale**: Includes an optimized batch-seeding script capable of inserting 200,000+ realistic product records quickly.
-- **Premium Frontend**: Awwwards-level UI built with Next.js 15, Framer Motion, and Tailwind CSS. Features glassmorphism, fluid animations, and a real-time stats dashboard.
-- **Production-Ready Backend**: Complete Express.js/Node.js architecture with centralized error handling, Zod validation, Rate Limiting, Helmet, and Graceful Shutdown.
+- **Cursor Pagination**: Uses composite cursors `(createdAt, id)` for stable, deterministic pagination that never skips or duplicates items during concurrent writes.
+- **High Performance API**: Backend queries optimized using PostgreSQL composite indexes.
+- **Data Scaling**: Batch-seeding script capable of inserting 200,000+ mock products.
+- **Modern Dashboard**: Clean, responsive frontend built with Next.js 15, Framer Motion, and Tailwind CSS.
+- **Production-Ready Backend**: Express.js/Node.js architecture with centralized error handling, Zod validation, Rate Limiting, Helmet, and Graceful Shutdown.
 
 ## 🏗️ Technology Stack
 
@@ -90,5 +90,4 @@ Inserting 200k records via a standard loop would take hours due to transaction o
 - **Backend API**: Stateless design, easily horizontally scalable. Rate limiting and compression are built-in.
 - **Frontend**: Utilizes Next.js App Router for optimal rendering, combined with intersection observers for efficient infinite scrolling DOM management.
 
----
-*Developed as an internship project showcasing Staff-Level Engineering practices.*
+
